@@ -1,0 +1,42 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.env
+venv/
+.env/
+.envrc
+
+# Jupyter
+.ipynb_checkpoints
+
+# VS Code
+.vscode/
+
+# Streamlit
+.streamlit/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Data
+*.csv
+*.xlsx
+*.xls
+*.h5
+*.sqlite
+*.db
+
+# Logs
+*.log
+
+# Misc
+*.bak
+*.tmp
+*.swp
+
+# Environment
+*.conda
+*.egg-info/
