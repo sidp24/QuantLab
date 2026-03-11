@@ -1,7 +1,3 @@
-"""
-Portfolio Builder Page - Build and analyze multi-leg option strategies.
-"""
-
 import streamlit as st
 import numpy as np
 import pandas as pd
@@ -35,7 +31,7 @@ col1, col2 = st.columns([1, 2])
 
 with col1:
     st.subheader("Add Option Leg")
-    
+
     # Strategy Templates
     st.markdown("#### Quick Templates")
     template_name = st.selectbox(
@@ -43,7 +39,7 @@ with col1:
         ["Custom"] + list(STRATEGY_TEMPLATES.keys()),
         help="Pre-built strategies to get started"
     )
-    
+
     if template_name != "Custom":
         if st.button("Load Template", use_container_width=True):
             template = STRATEGY_TEMPLATES[template_name]
@@ -60,39 +56,39 @@ with col1:
                 st.session_state.portfolio.add_leg(leg)
             st.success(f"Loaded: {template_name}")
             st.rerun()
-    
+
     st.markdown("---")
     st.markdown("#### Manual Entry")
-    
+
     with st.form("add_leg_form", clear_on_submit=True):
         leg_type = st.selectbox("Type", ["Call", "Put"])
         leg_strike = st.number_input("Strike ($)", min_value=0.01, value=spot_price, step=1.0)
         leg_expiry = st.selectbox("Expiry", ["7 days", "14 days", "30 days", "60 days", "90 days", "180 days", "365 days"])
         leg_qty = st.number_input("Quantity", min_value=-100, max_value=100, value=1, step=1,
                                    help="Positive = Long, Negative = Short")
-        
+
         # Calculate premium
         days = int(leg_expiry.split()[0])
         T = days / 365
         premium = bs_price(spot_price, leg_strike, T, risk_free_rate, volatility, leg_type)
         st.info(f"Theoretical Premium: ${premium:.2f}")
-        
+
         custom_premium = st.number_input("Premium (override)", min_value=0.0, value=premium, step=0.1)
-        
+
         submitted = st.form_submit_button("Add Leg", use_container_width=True, type="primary")
         if submitted:
             leg = OptionLeg(leg_type, leg_strike, leg_expiry, leg_qty, custom_premium)
             portfolio.add_leg(leg)
             st.success("Leg added!")
             st.rerun()
-    
+
     if st.button("Clear Portfolio", use_container_width=True):
         st.session_state.portfolio = Portfolio()
         st.rerun()
 
 with col2:
     st.subheader("Portfolio Legs")
-    
+
     if portfolio.legs:
         # Create DataFrame for display
         legs_data = []
@@ -109,10 +105,10 @@ with col2:
                 "Premium": f"${leg.premium:.2f}",
                 "Cost/Credit": f"${cost:.2f}" if leg.quantity > 0 else f"(${abs(cost):.2f})"
             })
-        
+
         df = pd.DataFrame(legs_data)
         st.dataframe(df, use_container_width=True, hide_index=True)
-        
+
         # Remove leg buttons
         cols = st.columns(len(portfolio.legs))
         for i, col in enumerate(cols):
@@ -120,13 +116,13 @@ with col2:
                 if st.button(f"Remove #{i+1}", key=f"remove_{i}"):
                     portfolio.remove_leg(i)
                     st.rerun()
-        
+
         # Summary metrics
         st.markdown("---")
         st.markdown("#### Portfolio Summary")
-        
+
         metrics = portfolio.calculate_metrics(spot_price, risk_free_rate, volatility)
-        
+
         col1, col2, col3, col4 = st.columns(4)
         with col1:
             st.metric("Net Premium", f"${metrics['net_premium']:.2f}",
@@ -140,11 +136,11 @@ with col2:
                 st.metric("Breakeven", f"${metrics['breakeven'][0]:.2f}")
             else:
                 st.metric("Breakeven", "N/A")
-        
+
         # Portfolio Greeks
         st.markdown("#### Portfolio Greeks")
         greeks = portfolio.calculate_portfolio_greeks(spot_price, risk_free_rate, volatility)
-        
+
         col1, col2, col3, col4, col5 = st.columns(5)
         with col1:
             st.metric("Delta", f"{greeks['delta']:.4f}")
@@ -156,7 +152,7 @@ with col2:
             st.metric("Theta", f"{greeks['theta']:.4f}")
         with col5:
             st.metric("Rho", f"{greeks['rho']:.4f}")
-        
+
     else:
         st.info("Add option legs to build your portfolio.")
 
@@ -166,38 +162,38 @@ st.subheader("Payoff Analysis")
 
 if portfolio.legs:
     tab1, tab2, tab3 = st.tabs(["Payoff Diagram", "P&L Scenarios", "Risk Analysis"])
-    
+
     with tab1:
         col1, col2 = st.columns([3, 1])
         with col2:
             price_range = st.slider(
-                "Price Range (%)", 
+                "Price Range (%)",
                 min_value=20, max_value=100, value=50,
                 help="Range around spot price to analyze"
             )
             show_components = st.checkbox("Show Individual Legs", value=False)
-        
+
         with col1:
             portfolio_payoff_diagram(
-                portfolio, 
-                spot_price, 
+                portfolio,
+                spot_price,
                 price_range_pct=price_range/100,
                 show_components=show_components
             )
-    
+
     with tab2:
         st.markdown("#### P&L at Different Price Levels")
-        
+
         # Generate scenarios
         price_points = [spot_price * mult for mult in [0.7, 0.8, 0.9, 0.95, 1.0, 1.05, 1.1, 1.2, 1.3]]
         scenarios = []
-        
+
         for price in price_points:
             payoff = portfolio.get_payoff(price)
             net_premium = sum(leg.premium * leg.quantity for leg in portfolio.legs)
             pnl = payoff - net_premium * 100  # Convert to per-share
             pct_change = (price - spot_price) / spot_price * 100
-            
+
             scenarios.append({
                 "Stock Price": f"${price:.2f}",
                 "% Change": f"{pct_change:+.1f}%",
@@ -205,17 +201,17 @@ if portfolio.legs:
                 "Net P&L": f"${pnl:.2f}",
                 "P&L %": f"{pnl / abs(net_premium * 100) * 100:+.1f}%" if net_premium != 0 else "N/A"
             })
-        
+
         st.dataframe(pd.DataFrame(scenarios), use_container_width=True, hide_index=True)
-    
+
     with tab3:
         st.markdown("#### Risk Metrics")
-        
+
         col1, col2 = st.columns(2)
-        
+
         with col1:
             st.markdown("**Position Characteristics**")
-            
+
             net_delta = greeks['delta']
             if abs(net_delta) < 0.1:
                 st.success("Delta Neutral (low directional risk)")
@@ -223,29 +219,29 @@ if portfolio.legs:
                 st.warning("Bullish Position (positive delta)")
             elif net_delta < -0.5:
                 st.warning("Bearish Position (negative delta)")
-            
+
             if greeks['gamma'] > 0:
                 st.info("Long Gamma (benefits from volatility)")
             else:
                 st.info("Short Gamma (hurt by large moves)")
-            
+
             if greeks['theta'] < 0:
                 st.warning(f"Time Decay: ${abs(greeks['theta']):.2f}/day")
             else:
                 st.success(f"Time Premium: ${greeks['theta']:.2f}/day")
-        
+
         with col2:
             st.markdown("**Stress Test**")
-            
+
             stress_scenarios = {
                 "Stock +10%": spot_price * 1.10,
                 "Stock -10%": spot_price * 0.90,
                 "Stock +20%": spot_price * 1.20,
                 "Stock -20%": spot_price * 0.80,
             }
-            
+
             net_premium = sum(leg.premium * leg.quantity for leg in portfolio.legs)
-            
+
             stress_results = []
             for scenario, price in stress_scenarios.items():
                 payoff = portfolio.get_payoff(price)
@@ -254,13 +250,13 @@ if portfolio.legs:
                     "Scenario": scenario,
                     "P&L": f"${pnl:.2f}"
                 })
-            
+
             st.dataframe(pd.DataFrame(stress_results), use_container_width=True, hide_index=True)
 
     # Export functionality
     st.markdown("---")
     col1, col2, col3 = st.columns(3)
-    
+
     with col1:
         if st.button("📥 Export to CSV"):
             csv_data = df.to_csv(index=False)
@@ -270,7 +266,7 @@ if portfolio.legs:
                 file_name="portfolio.csv",
                 mime="text/csv"
             )
-    
+
 else:
     st.info("Build a portfolio to see payoff analysis.")
 

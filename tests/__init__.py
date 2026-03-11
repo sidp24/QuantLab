@@ -1,3 +1,1 @@
-"""
-QuantLab Test Suite
-"""
+

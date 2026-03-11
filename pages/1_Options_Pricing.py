@@ -1,7 +1,3 @@
-"""
-Options Pricing Page - Black-Scholes, Monte Carlo, and Binomial Tree models.
-"""
-
 import streamlit as st
 import numpy as np
 from typing import Tuple, Optional
@@ -49,30 +45,30 @@ with col1:
 st.sidebar.header("Option Parameters")
 
 S = st.sidebar.number_input(
-    "Spot Price ($)", 
-    min_value=0.01, 
+    "Spot Price ($)",
+    min_value=0.01,
     value=st.session_state.spot_price,
     step=1.0,
     help="Current stock price"
 )
 K = st.sidebar.number_input(
-    "Strike Price ($)", 
-    min_value=0.01, 
+    "Strike Price ($)",
+    min_value=0.01,
     value=100.0,
     step=1.0,
     help="Option strike price"
 )
 T = st.sidebar.number_input(
-    "Time to Expiry (years)", 
-    min_value=0.001, 
+    "Time to Expiry (years)",
+    min_value=0.001,
     max_value=10.0,
     value=1.0,
     step=0.01,
     help="Time until option expiration"
 )
 r = st.sidebar.number_input(
-    "Risk-Free Rate", 
-    min_value=0.0, 
+    "Risk-Free Rate",
+    min_value=0.0,
     max_value=1.0,
     value=0.05,
     step=0.005,
@@ -80,8 +76,8 @@ r = st.sidebar.number_input(
     help="Annual risk-free interest rate"
 )
 sigma = st.sidebar.number_input(
-    "Volatility (σ)", 
-    min_value=0.001, 
+    "Volatility (σ)",
+    min_value=0.001,
     max_value=5.0,
     value=st.session_state.market_vol,
     step=0.01,
@@ -92,19 +88,19 @@ option_type = st.sidebar.selectbox("Option Type", ("Call", "Put"))
 
 # Main content - Tabs for different models
 tab1, tab2, tab3, tab4, tab5 = st.tabs([
-    "Black-Scholes", 
-    "Monte Carlo", 
-    "Binomial Tree", 
-    "Greeks", 
+    "Black-Scholes",
+    "Monte Carlo",
+    "Binomial Tree",
+    "Greeks",
     "Implied Volatility"
 ])
 
 with tab1:
     st.subheader("Black-Scholes Model (European Options)")
-    
+
     try:
         price = bs_price(S, K, T, r, sigma, option_type)
-        
+
         col1, col2, col3 = st.columns(3)
         with col1:
             st.metric(f"{option_type} Price", f"${price:.4f}")
@@ -114,28 +110,28 @@ with tab1:
         with col3:
             time_value = price - intrinsic
             st.metric("Time Value", f"${time_value:.4f}")
-        
+
         st.markdown("---")
         st.markdown("#### Payoff Diagram")
         payoff_diagram(S, K, option_type, premium=price)
-        
+
     except Exception as e:
         st.error(f"Error calculating price: {str(e)}")
 
 with tab2:
     st.subheader("Monte Carlo Simulation (European Options)")
-    
+
     col1, col2 = st.columns(2)
     with col1:
         n_sim = st.slider("Number of Simulations", 1000, 100000, 10000, step=1000)
     with col2:
         show_paths = st.checkbox("Show Sample Paths", value=True)
-    
+
     if st.button("Run Simulation", type="primary"):
         with st.spinner("Running Monte Carlo simulation..."):
             try:
                 price, ci_low, ci_high, std_err = price_with_ci(S, K, T, r, sigma, option_type, n_sim)
-                
+
                 col1, col2, col3, col4 = st.columns(4)
                 with col1:
                     st.metric(f"{option_type} Price", f"${price:.4f}")
@@ -145,28 +141,28 @@ with tab2:
                     st.metric("95% CI Upper", f"${ci_high:.4f}")
                 with col4:
                     st.metric("Std Error", f"${std_err:.6f}")
-                
+
                 bs_ref = bs_price(S, K, T, r, sigma, option_type)
                 st.info(f"Black-Scholes Reference: ${bs_ref:.4f} | MC Error: {abs(price - bs_ref):.4f}")
-                
+
                 if show_paths:
                     st.markdown("#### Simulated Price Paths")
                     monte_carlo_paths(S, T, r, sigma, n_paths=50, n_steps=100)
-                    
+
             except Exception as e:
                 st.error(f"Simulation error: {str(e)}")
 
 with tab3:
     st.subheader("Binomial Tree Model (American Options)")
-    
+
     steps = st.slider("Number of Steps", 10, 500, 100, step=10,
                       help="More steps = higher accuracy but slower computation")
-    
+
     try:
         american_price = bt_price(S, K, T, r, sigma, option_type, steps, american=True)
         european_price = bt_price(S, K, T, r, sigma, option_type, steps, american=False)
         bs_ref = bs_price(S, K, T, r, sigma, option_type)
-        
+
         col1, col2, col3 = st.columns(3)
         with col1:
             st.metric("American Option", f"${american_price:.4f}")
@@ -175,31 +171,31 @@ with tab3:
         with col3:
             early_exercise_premium = american_price - european_price
             st.metric("Early Exercise Premium", f"${early_exercise_premium:.4f}")
-        
+
         st.info(f"Black-Scholes Reference: ${bs_ref:.4f} | Tree Error: {abs(european_price - bs_ref):.4f}")
-        
+
         # Show convergence
         if st.checkbox("Show Convergence Analysis"):
             import pandas as pd
             step_range = [10, 25, 50, 100, 200, 300, 500]
             prices = [bt_price(S, K, T, r, sigma, option_type, s, american=True) for s in step_range]
-            
+
             df = pd.DataFrame({
                 "Steps": step_range,
                 "Price": prices,
                 "Error vs BS": [abs(p - bs_ref) for p in prices]
             })
             st.dataframe(df, use_container_width=True)
-            
+
     except Exception as e:
         st.error(f"Error: {str(e)}")
 
 with tab4:
     st.subheader("Option Greeks (Black-Scholes)")
-    
+
     try:
         delta, gamma, vega, theta, rho = bs_greeks(S, K, T, r, sigma, option_type)
-        
+
         col1, col2, col3, col4, col5 = st.columns(5)
         with col1:
             st.metric("Delta (Δ)", f"{delta:.4f}", help="Price sensitivity to underlying")
@@ -211,12 +207,12 @@ with tab4:
             st.metric("Theta (Θ)", f"{theta:.4f}", help="Time decay per day")
         with col5:
             st.metric("Rho (ρ)", f"{rho:.4f}", help="Price sensitivity to interest rate")
-        
+
         st.markdown("---")
         st.markdown("#### Greeks Interpretation")
-        
+
         price = bs_price(S, K, T, r, sigma, option_type)
-        
+
         st.markdown(f"""
         | Greek | Value | 1-Unit Change Impact |
         |-------|-------|---------------------|
@@ -226,35 +222,35 @@ with tab4:
         | **Theta** | {theta:.4f} | 1 day passes → ${theta/365:.4f} option change |
         | **Rho** | {rho:.4f} | 1% rate change → ${rho/100:.4f} option change |
         """)
-        
+
         # Greeks surface plot
         if st.checkbox("Show Greeks Surface"):
             from utils.plotting import greeks_surface
             greek_choice = st.selectbox("Select Greek", ["Delta", "Gamma", "Vega", "Theta"])
             greeks_surface(S, K, T, r, sigma, option_type, greek_choice.lower())
-            
+
     except Exception as e:
         st.error(f"Error calculating Greeks: {str(e)}")
 
 with tab5:
     st.subheader("Implied Volatility Calculator")
     st.markdown("Calculate the implied volatility from a market option price.")
-    
+
     col1, col2 = st.columns(2)
     with col1:
         market_price = st.number_input(
-            "Market Option Price ($)", 
-            min_value=0.01, 
+            "Market Option Price ($)",
+            min_value=0.01,
             value=10.0,
             step=0.1,
             help="Observed market price of the option"
         )
-    
+
     if st.button("Calculate IV", type="primary"):
         with st.spinner("Solving for implied volatility..."):
             try:
                 iv = implied_volatility(market_price, S, K, T, r, option_type)
-                
+
                 if iv is not None:
                     col1, col2, col3 = st.columns(3)
                     with col1:
@@ -265,7 +261,7 @@ with tab5:
                         st.metric("Repriced Value", f"${repriced:.4f}")
                     with col3:
                         st.metric("Pricing Error", f"${abs(repriced - market_price):.6f}")
-                    
+
                     # Compare to historical vol
                     if st.session_state.market_vol:
                         diff = iv - st.session_state.market_vol
@@ -276,7 +272,7 @@ with tab5:
                                 st.info(f"ℹ️ IV ({iv:.1%}) is lower than historical vol ({st.session_state.market_vol:.1%})")
                 else:
                     st.error("Could not converge to a solution. Check that the market price is valid.")
-                    
+
             except Exception as e:
                 st.error(f"Error: {str(e)}")
 

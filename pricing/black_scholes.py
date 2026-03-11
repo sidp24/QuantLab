@@ -1,7 +1,4 @@
-"""
-Black-Scholes Option Pricing Model
-Implements closed-form solutions for European option pricing and Greeks.
-"""
+
 
 import numpy as np
 import scipy.stats as si

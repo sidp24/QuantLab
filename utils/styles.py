@@ -1,8 +1,3 @@
-"""
-QuantLab Design System
-Modern, clean, and professional styling for the application.
-"""
-
 # Color palette
 COLORS = {
     "primary": "#00D4FF",       # Cyan accent
@@ -19,7 +14,6 @@ COLORS = {
 }
 
 def get_global_styles():
-    """Return the global CSS styles for the application."""
     return """
 <style>
     /* ===== IMPORT FONTS ===== */
@@ -487,11 +481,11 @@ def get_global_styles():
         .main .block-container {
             padding: 1rem;
         }
-        
+
         .quantlab-logo {
             font-size: 2.5rem;
         }
-        
+
         .stat-value {
             font-size: 2rem;
         }
@@ -501,13 +495,11 @@ def get_global_styles():
 
 
 def inject_styles():
-    """Inject the global styles into a Streamlit page."""
     import streamlit as st
     st.markdown(get_global_styles(), unsafe_allow_html=True)
 
 
 def create_stat_card(value: str, label: str, icon: str = "") -> str:
-    """Create an HTML stat card component."""
     return f"""
     <div class="stat-card">
         <div class="stat-value">{icon}{value}</div>
@@ -526,7 +518,6 @@ ICONS = {
 
 
 def create_feature_card(icon_key: str, title: str, description: str) -> str:
-    """Create an HTML feature card component with SVG icon."""
     icon_svg = ICONS.get(icon_key, '')
     return f"""
     <div class="feature-card">
@@ -538,6 +529,5 @@ def create_feature_card(icon_key: str, title: str, description: str) -> str:
 
 
 def create_glass_card(content: str, accent: bool = False) -> str:
-    """Create a glassmorphism card."""
     accent_class = " glass-card-accent" if accent else ""
     return f'<div class="glass-card{accent_class}">{content}</div>'

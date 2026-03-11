@@ -1,7 +1,4 @@
-"""
-Portfolio and Strategy Analysis Module
-Build and analyze multi-leg option strategies.
-"""
+
 
 from typing import List, Dict, Optional, Tuple
 import numpy as np

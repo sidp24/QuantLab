@@ -1,7 +1,4 @@
-"""
-Binomial Tree Option Pricing Model
-Implements Cox-Ross-Rubinstein model for European and American options.
-"""
+
 
 import numpy as np
 from typing import Tuple, Optional

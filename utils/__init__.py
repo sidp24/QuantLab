@@ -1,7 +1,4 @@
-"""
-QuantLab Utils Module
-Visualization and utility functions.
-"""
+
 
 from .plotting import (
     payoff_diagram,

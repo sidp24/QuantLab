@@ -1,7 +1,4 @@
-"""
-Implied Volatility Calculator
-Solves for the volatility that makes the Black-Scholes price equal to market price.
-"""
+
 
 import numpy as np
 from scipy.optimize import brentq, newton

@@ -1,7 +1,4 @@
-"""
-QuantLab Pricing Module
-Options pricing models including Black-Scholes, Monte Carlo, and Binomial Tree.
-"""
+
 
 from .black_scholes import price as bs_price, greeks as bs_greeks
 from .monte_carlo import price as mc_price, price_with_ci

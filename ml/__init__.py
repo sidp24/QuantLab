@@ -1,7 +1,4 @@
-"""
-QuantLab ML Module
-Machine learning models for volatility forecasting.
-"""
+
 
 from .vol_forecast import (
     fetch_price_history,

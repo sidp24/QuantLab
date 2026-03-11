@@ -1,7 +1,4 @@
-"""
-Monte Carlo Option Pricing
-Simulates stock price paths to price options and estimate confidence intervals.
-"""
+
 
 import numpy as np
 from typing import Tuple, Optional

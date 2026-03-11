@@ -1,7 +1,4 @@
-"""
-Machine Learning Volatility Forecasting Module
-Implements Random Forest and GARCH models for volatility prediction.
-"""
+
 
 import numpy as np
 import pandas as pd

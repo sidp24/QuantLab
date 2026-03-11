@@ -1,7 +1,4 @@
-"""
-QuantLab Data Module
-Market data fetching and processing.
-"""
+
 
 from .yahoo import (
     get_stock_info,

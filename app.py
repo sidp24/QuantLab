@@ -1,9 +1,3 @@
-
-"""
-QuantLab - Options Pricing & Quantitative Finance Platform
-Main application entry point and home page.
-"""
-
 import streamlit as st
 from utils.styles import inject_styles, create_stat_card, create_feature_card
 
@@ -50,7 +44,7 @@ with col1:
         "Options Pricing",
         "Price options with Black-Scholes, Monte Carlo simulation, and Binomial Trees. Calculate Greeks and implied volatility with precision."
     ), unsafe_allow_html=True)
-    
+
     st.markdown(create_feature_card(
         "portfolio",
         "Portfolio Builder",
@@ -63,7 +57,7 @@ with col2:
         "Option Chain Browser",
         "Real-time option chains from Yahoo Finance. Analyze volume, open interest, and visualize the IV smile."
     ), unsafe_allow_html=True)
-    
+
     st.markdown(create_feature_card(
         "forecast",
         "Volatility Forecast",
@@ -104,7 +98,7 @@ st.sidebar.markdown('<div class="sidebar-header">About</div>', unsafe_allow_html
 
 st.sidebar.markdown("""
 <div style="color: var(--text-muted); font-size: 0.85rem; line-height: 1.6;">
-    Built for quantitative analysis and options trading research. 
+    Built for quantitative analysis and options trading research.
     Powered by Python, NumPy, and Streamlit.
 </div>
 """, unsafe_allow_html=True)
